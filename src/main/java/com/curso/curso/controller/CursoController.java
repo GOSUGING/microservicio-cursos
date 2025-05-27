@@ -16,33 +16,47 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.curso.curso.model.Curso;
+import com.curso.curso.model.EstadoCurso;
+import com.curso.curso.model.StatusCursoEnum;
 import com.curso.curso.service.CursoService;
+import com.curso.curso.service.EstadoCursoService;
 
 @RestController
 @RequestMapping("/api/v1/cursos")
 public class CursoController {
 
     @Autowired
+    private EstadoCursoService estadoCursoService;
+
+    @Autowired
     private CursoService cursoService;
 
     @GetMapping
-    public ResponseEntity<List<Curso>> Listar() {
+    public ResponseEntity<List<Curso>> listar() {
         List<Curso> cursos = cursoService.findAll();
-        if(cursos.isEmpty()) {
+        if (cursos.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.ok(cursos);
     }
 
     @PostMapping
-    public ResponseEntity<Curso> guardar(@RequestBody Curso curso) {
-        Curso cursoNuveo = cursoService.save(curso);
-        return ResponseEntity.status(HttpStatus.CREATED).body(cursoNuveo);
+    public ResponseEntity<Curso> crear(@RequestBody Curso curso) {
+        if (curso.getEstadoCurso() == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
+        Curso nuevoCurso = cursoService.save(curso);
+        return ResponseEntity.status(HttpStatus.CREATED).body(nuevoCurso);
     }
 
     @GetMapping("/{id}")
-    public Optional<Curso> buscar(@PathVariable Integer id) {
-        return cursoService.findById(id);
+    public ResponseEntity<Curso> obtenerPorId(@PathVariable Integer id) {
+        Optional<Curso> curso = cursoService.findById(id);
+        if (curso.isPresent()) {
+            return ResponseEntity.ok(curso.get());
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @PutMapping("/{id}")
@@ -54,6 +68,23 @@ public class CursoController {
     @DeleteMapping("/{id}")
     public void eliminar(@PathVariable Integer id) {
         cursoService.delete(id);
+    }
+
+    @GetMapping("/estado/{status}")
+    public ResponseEntity<List<Curso>> buscarPorEstado(@PathVariable StatusCursoEnum status) {
+        EstadoCurso estadoCurso = estadoCursoService.findByStatus(status);
+
+        if (estadoCurso == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        List<Curso> cursos = estadoCurso.getCursos();
+
+        if (cursos == null || cursos.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
+        return ResponseEntity.ok(cursos);
     }
 
 }

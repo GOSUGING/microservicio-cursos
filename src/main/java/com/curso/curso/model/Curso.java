@@ -27,17 +27,14 @@ public class Curso {
     @Column(nullable = false)
     private String nombreCurso;
 
-    @Column(nullable = true)
+    @Column
     private String descripcionCurso;
 
     @Column(nullable = false)
-    
+    @Temporal(TemporalType.DATE) // Esto indica que solo se guarda la fecha, no la hora
     private Date duracionCurso;
 
-    @Column(nullable = false)
-    private String estadoCurso;
-
-
-    //Acá van las relaciones a las otras tablas
-
+    @ManyToOne
+    @JoinColumn(name = "estado_curso_id", nullable = false)
+    private EstadoCurso estadoCurso;
 }
