@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import com.curso.curso.model.Curso;
 import com.curso.curso.repository.CursoRepository;
 
-import org.springframework.beans.factory.annotation.Autowired;
+
 
 import jakarta.transaction.Transactional;
 
